@@ -1,0 +1,21 @@
+# secrets — Valkey 접속 정보 등
+.env
+*.env
+!.env.example
+
+# build
+device-registry/**/target/
+bench-write-heavy/**/bin/
+*.class
+
+# profiling / bench output
+*.pprof
+*.prof
+logs/
+
+# OS / editor
+.DS_Store
+.idea/
+.vscode/
+
+CLAUDE.md
