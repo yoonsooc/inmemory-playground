@@ -9,8 +9,8 @@ SSE 연결은 특정 서버 프로세스에만 존재한다. 서버가 여러 �
 
 ## 결정
 
-- 서버 로컬 상태는 `Map<deviceId, SseEmitter>` 하나로 제한한다. 이것이 원본이다.
-- 원본을 다른 서버에게 알리는 파생 기록을 Valkey에 둔다.
+- 서버 로컬 상태는 `Map<deviceId, SseEmitter>` 하나로 제한한다. 실제 연결을 쥐고 있는 것은 이 맵이므로, Valkey의 기록과 다를 때는 이 맵이 맞다.
+- 이 맵의 내용을 다른 서버에게 알리기 위한 기록을 Valkey에 적어 둔다.
   - `device:{id}` HASH: `server_id`, `status`, `last_seen`. TTL 30초.
   - `devices:known` SET: 한 번이라도 연결한 기기 id. 해시가 만료된 기기를 OFFLINE으로 표시하기 위한 목록.
 - 조회 API는 Valkey만 읽는다. 로컬 맵은 조회에 쓰지 않는다. 그래야 어느 서버에 물어도 같은 답이 나온다.
