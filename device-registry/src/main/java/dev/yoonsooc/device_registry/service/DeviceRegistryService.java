@@ -30,26 +30,44 @@ public class DeviceRegistryService {
     private static final String KNOWN_DEVICES_KEY = "devices:known";
 
     private final StringRedisTemplate redis;
-    private final RedisScript<Long> registerScript;
-    private final RedisScript<Long> unregisterScript;
+    private final RedisScript<Long> writeIfNewestScript;
+    private final RedisScript<Long> deleteIfMineScript;
     private final DeviceRegistryProperties properties;
 
     /** SSE 연결이 맺은 직후 호출 */
-    public void register(String deviceId) {
-        boolean isNew = redis.opsForSet().add(KNOWN_DEVICES_KEY, deviceId) == 1;
-        upsert(deviceId);
-        log.info("Device registered: id={}, server={}, new={}", deviceId, properties.serverId(), isNew);
+    public boolean register(String deviceId, long epoch) {
+        boolean isNew = Long.valueOf(1).equals(redis.opsForSet().add(KNOWN_DEVICES_KEY, deviceId));
+        boolean accepted = writeIfNewest(deviceId, epoch);
+        if (accepted) {
+            log.info("Device registered: id={}, server={}, new={}", deviceId, properties.serverId(), isNew);
+        }
+        return accepted;
     }
 
     /** ping 쓰기에 성공할 때마다 호출한다. 기록이 만료되어 있었다면 여기서 되살아난다. */
-    public void renew(String deviceId) {
-        upsert(deviceId);
-        log.debug("Lease renewed: id={}, server={}", deviceId, properties.serverId());
+    public boolean renew(String deviceId, long epoch) {
+        redis.opsForSet().add(KNOWN_DEVICES_KEY, deviceId);
+        boolean accepted = writeIfNewest(deviceId, epoch);
+        if (accepted) {
+            log.debug("Lease renewed: id={}, server={}", deviceId, properties.serverId());
+        }
+        return accepted;
+    }
+
+    private boolean writeIfNewest(String deviceId, long epoch) {
+        Long executeResult = redis.execute(writeIfNewestScript, List.of(key(deviceId)),
+                String.valueOf(properties.ttl().toSeconds()),
+                String.valueOf(epoch),
+                "server_id", properties.serverId(),
+                "status", "ONLINE",
+                "last_seen", Instant.now().toString());
+
+        return Long.valueOf(1).equals(executeResult);
     }
 
     /** 연결이 끊긴 서버가 호출. 디바이스가 이미 다른 서버로 옮겨갔다면 아무것도 지우지 않음 */
-    public void unregister(String deviceId) {
-        Long deleted = redis.execute(unregisterScript, List.of(key(deviceId)), properties.serverId());
+    public void deleteIfMine(String deviceId, long epoch) {
+        Long deleted = redis.execute(deleteIfMineScript, List.of(key(deviceId)), String.valueOf(epoch));
         if (deleted != null && deleted == 1) {
             log.info("Device unregistered: id={}, server={}", deviceId, properties.serverId());
         } else {
@@ -72,15 +90,6 @@ public class DeviceRegistryService {
                 .map(deviceId -> DeviceStatus.from(deviceId,
                         redis.<String, String>opsForHash().entries(key(deviceId))))
                 .toList();
-    }
-
-    /** 등록과 갱신은 동일한 Write에 해당 */
-    private void upsert(String deviceId) {
-        redis.execute(registerScript, List.of(key(deviceId)),
-                String.valueOf(properties.ttl().toSeconds()),
-                "server_id", properties.serverId(),
-                "status", "ONLINE",
-                "last_seen", Instant.now().toString());
     }
 
     private String key(String deviceId) {

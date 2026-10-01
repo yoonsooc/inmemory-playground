@@ -9,12 +9,12 @@ import org.springframework.data.redis.core.script.RedisScript;
 public class RedisScriptConfig {
 
     @Bean
-    public RedisScript<Long> registerScript() {
-        return RedisScript.of(new ClassPathResource("scripts/register.lua"), Long.class);
+    public RedisScript<Long> writeIfNewestScript() {
+        return RedisScript.of(new ClassPathResource("scripts/write_if_newest.lua"), Long.class);
     }
 
     @Bean
-    public RedisScript<Long> unregisterScript() {
-        return RedisScript.of(new ClassPathResource("scripts/unregister.lua"), Long.class);
+    public RedisScript<Long> deleteIfMineScript() {
+        return RedisScript.of(new ClassPathResource("scripts/delete_if_mine.lua"), Long.class);
     }
 }
