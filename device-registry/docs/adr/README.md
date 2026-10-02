@@ -9,7 +9,7 @@
 | [0002](0002-sse-for-server-to-device.md) | 서버 → 기기 채널로 SSE를 쓴다 | 채택 | 2026-09-30 |
 | [0003](0003-server-side-lease-renewal.md) | 임대 갱신 주체를 기기에서 연결 주인 서버로 옮긴다 | 채택 (원안 대체, 0006으로 보완) | 2026-09-29 |
 | [0004](0004-disconnect-cleanup-rules.md) | 연결 해제 시 자기 기록만 원자적으로 지운다 | 채택 (삭제 조건은 0006으로 변경) | 2026-09-11 |
-| [0005](0005-command-routing-via-pubsub.md) | 명령은 서버별 Pub/Sub 채널로 연결 주인에게 보낸다 | 제안 | 2026-09-30 |
+| [0005](0005-command-routing-via-pubsub.md) | 명령은 서버별 Pub/Sub 채널로 연결을 쥔 서버에 보낸다 | 채택 (구현·검증됨) | 2026-09-30 |
 | [0006](0006-connection-epoch-for-lease-writes.md) | Valkey에 쓸 때 연결 번호(epoch)를 비교한다 (좀비 연결이 새 연결의 기록을 덮어쓰지 못하게) | 채택 (구현·검증됨) | 2026-10-01 |
 
 상태: 제안 → 채택 → (대체됨 | 폐기)
