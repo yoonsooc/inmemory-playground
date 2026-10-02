@@ -75,6 +75,11 @@ public class DeviceRegistryService {
         }
     }
 
+    /** 기록에 적힌 연결 주인 서버. 기록이 없으면(오프라인) 비어 있다. 명령을 어느 서버로 보낼지 정할 때 쓴다. */
+    public Optional<String> findDeviceOwnerServer(String deviceId) {
+        return Optional.ofNullable(redis.<String, String>opsForHash().get(key(deviceId), "server_id"));
+    }
+
     public Optional<DeviceStatus> find(String deviceId) {
         Map<String, String> fields = redis.<String, String>opsForHash().entries(key(deviceId));
         boolean unknown = fields.isEmpty() && !redis.opsForSet().isMember(KNOWN_DEVICES_KEY, deviceId);

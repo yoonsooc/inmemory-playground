@@ -68,18 +68,18 @@ public class DeviceConnectionManager {
             log.warn("Register failed, will retry on next ping: id={}, cause={}", deviceId, e.toString());
         }
 
-        trySend(deviceId, emitter, "connected", Map.of("serverId", properties.serverId()));
+        trySendMessage(deviceId, emitter, "connected", Map.of("serverId", properties.serverId()));
         log.info("SSE connected: id={}, local connections={}", deviceId, connections.size());
         return emitter;
     }
 
-    /** 이 서버가 연결을 쥐고 있을 때만 보낸다. 4단계(Pub/Sub)에서 명령 전달에 쓴다. */
-    public boolean send(String deviceId, String event, Object data) {
+    /** 이 서버가 SSE 연결을 쥐고 있을 때만 명령을 보낸다. */
+    public boolean commandDevice(String deviceId, String event, Object data) {
         Connection connection = connections.get(deviceId);
         if (connection == null) {
             return false;
         }
-        if (!trySend(deviceId, connection.emitter(), event, data)) {
+        if (!trySendMessage(deviceId, connection.emitter(), event, data)) {
             connection.emitter().complete();
             return false;
         }
@@ -101,7 +101,7 @@ public class DeviceConnectionManager {
     }
 
     private void pingAndExtend(String deviceId, Connection connection) {
-        if (!trySend(deviceId, connection.emitter(), "ping", properties.serverId())) {
+        if (!trySendMessage(deviceId, connection.emitter(), "ping", properties.serverId())) {
             connection.emitter().complete();
             return;
         }
@@ -118,7 +118,7 @@ public class DeviceConnectionManager {
         }
     }
 
-    private boolean trySend(String deviceId, SseEmitter emitter, String event, Object data) {
+    private boolean trySendMessage(String deviceId, SseEmitter emitter, String event, Object data) {
         try {
             emitter.send(SseEmitter.event().name(event).data(data));
             return true;
