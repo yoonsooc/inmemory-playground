@@ -8,7 +8,7 @@
 | 실험 | 결과 | 핵심 수치 |
 |---|---|---|
 | 1. 두 서버에서 조회 결과 동일 | 통과 | 응답 바이트 단위 동일 |
-| 3. 기기 kill -9 → 서버가 감지·정리 | 통과 | 17초 (ping 2회째에 실패) |
+| 3. 기기 kill -9 → 서버가 감지하고 정리 | 통과 | 17초 (ping 2회째에 실패) |
 | 2. 서버 kill -9 → 다른 서버로 재연결 | 통과 | 1초 만에 app-2로, server_id 즉시 전환 |
 | 5. 서버 재기동 → 다시 연결 받음 | 통과 | 재기동 3초 후 health UP, 라운드로빈 복귀 |
 | 2b. 서버+기기 동시 사망 (재연결 없음) | 통과 | ping 실패 정리 16초, TTL 만료 정리 24초(마지막 갱신 후 30초) |
@@ -20,7 +20,7 @@
 02:57:35.944 [dev-1] connected to server=app-1
 02:57:35.944 [dev-2] connected to server=app-2
 02:57:35.944 [dev-3] connected to server=app-1
-02:57:40.766 [dev-1] ping from app-1        ← 첫 ping. 이때 last_seen·TTL 갱신됨
+02:57:40.766 [dev-1] ping from app-1        ← 첫 ping. 이때 last_seen과 TTL 갱신됨
 
 $ curl localhost:8081/devices   # app-1
 $ curl localhost:8082/devices   # app-2
@@ -42,7 +42,7 @@ $ valkey-cli smembers devices:known → dev-1 dev-2 dev-3
 02:58:21  3대 모두 OFFLINE (kill 후 17초). valkey device:* 키 0개
 ```
 
-TCP 쓰기는 상대 수신 확인 없이 성공으로 돌아온다(ADR-0003 "잃는 것"). 그래서 첫 ping은 통과하고 두 번째 ping에서 실패했다. 감지 지연은 ping 주기의 1~2배다.
+TCP 쓰기는 기기가 받았다는 확인 없이 성공으로 돌아온다(ADR-0003 "잃는 것"). 첫 ping이 죽은 연결에 도착하자 반대편 운영체제가 "그런 연결은 없다"는 거절 응답을 돌려줬고, 그 뒤의 두 번째 ping에서 쓰기가 실패했다. 감지 지연은 ping 주기의 1~2배다.
 
 ## 실험 2. 서버 kill -9 → 다른 서버로 재연결
 
