@@ -8,12 +8,13 @@
 |---|---|---|---|---|
 | [0001](0001-renew-also-sadd.md) | 갱신(renew)에서도 `devices:known`에 SADD | 채택 (구현됨) | 이중 쓰기 리뷰 | 2026-09-30 |
 | [0002](0002-unregister-retry-queue.md) | 삭제 실패 시 로컬 대기 목록으로 재시도 | 대기 | 이중 쓰기 리뷰 | 2026-09-30 |
-| [0003](0003-dual-write-failure-metrics.md) | 등록·갱신·삭제 실패 카운터 (Micrometer) | 대기 | 이중 쓰기 리뷰 | 2026-09-30 |
+| [0003](0003-dual-write-failure-metrics.md) | 등록, 갱신, 삭제 실패 카운터 (Micrometer) | 대기 | 이중 쓰기 리뷰 | 2026-09-30 |
 | [0004](0004-client-side-liveness-heartbeat.md) | 기기가 ping에 연결 정보를 실어 응답 (구 "보조 하트비트") | 대기 | ADR-0003 | 2026-09-30 |
 | [0005](0005-connection-token-in-hash.md) | 연결 토큰을 해시에 저장해 같은 서버 재연결을 저장소 수준에서 구분 | 채택 (ADR-0006에 흡수) | ADR-0004 | 2026-09-30 |
 | [0006](0006-reconnect-jitter.md) | 재연결 지연 지터 | 대기 | PRD 한계 | 2026-09-30 |
 | [0007](0007-command-ack.md) | 명령 전달 확인(ack) | 대기 | ADR-0005 | 2026-09-30 |
 | [0008](0008-stale-connection-renew-overwrite.md) | 좀비 연결의 갱신이 새 연결의 server_id를 덮어씀 (결함) | 채택 (ADR-0006으로 승격) | 실험 2026-10-01 | 2026-10-01 |
+| [0009](0009-forward-command-once.md) | 연결이 없는 서버가 받은 명령을 한 번 다시 넘기기 | 대기 | ADR-0005 검토 | 2026-10-03 |
 
 형식:
 
